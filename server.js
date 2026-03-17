@@ -707,6 +707,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: 'Internal server error' });
 });
 
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://13.126.144.58' , 'https://mohiniprinters.netlify.app'],
+  credentials: true
+}));
 // ========================================
 // START
 // ========================================
