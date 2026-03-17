@@ -714,7 +714,7 @@ app.use(cors({
 // ========================================
 // START
 // ========================================
-const PORT =  3000;
+const PORT =  5000;
 
 sequelize.sync({ alter: process.env.NODE_ENV === 'development' }).then(() => {
   console.log('✓ Database synced');
