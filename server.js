@@ -708,7 +708,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://13.126.144.58' , 'https://mohiniprinters.netlify.app' , 'https://mohini.gobt.in'],
+  origin: ['http://localhost:3000', 'http://13.126.144.58' , 'https://mohiniprinters.netlify.app' , 'https://mohiniprintshop.org'],
   credentials: true
 }));
 // ========================================
