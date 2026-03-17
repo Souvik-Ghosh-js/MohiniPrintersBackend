@@ -23,7 +23,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # Navigate to backend directory
-            cd /home/${{ secrets.EC2_USER }}/canva-backend || exit 1
+            cd /home/${{ secrets.EC2_USER }}/MohiniPrintersBackend || exit 1
             
             # Pull latest code
             git pull origin main
