@@ -112,16 +112,24 @@ const sequelize = new Sequelize(
     pool: { max: 10, min: 0, acquire: 30000, idle: 10000 }
   }
 );
-
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://13.126.144.58',
+    'https://mohiniprinters.netlify.app',
+    'https://mohini.gobt.in',
+    'https://mohiniprintshop.org',
+    'https://www.mohiniprintshop.org'
+  ],
+  credentials: true
+}));
 // ========================================
 // MIDDLEWARE
 // ========================================
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
-  credentials: true
-}));
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
