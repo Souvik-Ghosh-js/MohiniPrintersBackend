@@ -1,14 +1,13 @@
-// migrate.js - Database Migration Script
+// migrate.js - Database Migration Script (raw SQL, no Sequelize)
 const mysql = require('mysql2/promise');
-const fs = require('fs');
 require('dotenv').config();
 
 const DB_SCHEMA = `
--- Drop existing database if needed
--- DROP DATABASE IF EXISTS canva_db;
-
--- Create database
-CREATE DATABASE IF NOT EXISTS canva_db;
+-- ============================================================
+-- DROP old database completely and recreate fresh
+-- ============================================================
+DROP DATABASE IF EXISTS canva_db;
+CREATE DATABASE canva_db;
 USE canva_db;
 
 -- Users table
@@ -54,6 +53,7 @@ CREATE TABLE IF NOT EXISTS templates (
   width INT DEFAULT 1920,
   height INT DEFAULT 1080,
   is_featured BOOLEAN DEFAULT FALSE,
+  tags VARCHAR(500),
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   KEY idx_category (category),
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS backgrounds (
   KEY idx_featured (is_featured)
 );
 
--- Assets table (Images, Icons, Stickers)
+-- Assets table
 CREATE TABLE IF NOT EXISTS assets (
   id INT PRIMARY KEY AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
@@ -103,68 +103,74 @@ CREATE TABLE IF NOT EXISTS fonts (
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Insert default fonts
-INSERT IGNORE INTO fonts (name, font_family, category, is_default) VALUES
+-- ============================================================
+-- Seed: Fonts
+-- ============================================================
+INSERT INTO fonts (name, font_family, category, is_default) VALUES
 ('Arial', 'Arial, sans-serif', 'sans-serif', TRUE),
 ('Helvetica', 'Helvetica, sans-serif', 'sans-serif', TRUE),
-('Times New Roman', 'Times New Roman, serif', 'serif', TRUE),
+('Times New Roman', "'Times New Roman', serif", 'serif', TRUE),
 ('Georgia', 'Georgia, serif', 'serif', TRUE),
-('Courier New', 'Courier New, monospace', 'monospace', TRUE),
-('Comic Sans', 'Comic Sans MS, cursive', 'cursive', FALSE),
-('Verdana', 'Verdana, sans-serif', 'sans-serif', TRUE);
+('Courier New', "'Courier New', monospace", 'monospace', TRUE),
+('Verdana', 'Verdana, sans-serif', 'sans-serif', TRUE),
+('Trebuchet MS', "'Trebuchet MS', sans-serif", 'sans-serif', FALSE),
+('Impact', 'Impact, fantasy', 'display', FALSE),
+('Comic Sans MS', "'Comic Sans MS', cursive", 'cursive', FALSE),
+('Tahoma', 'Tahoma, sans-serif', 'sans-serif', FALSE);
 
--- Insert default backgrounds
-INSERT IGNORE INTO backgrounds (title, is_color, color_code, category, is_featured) VALUES
+-- ============================================================
+-- Seed: Backgrounds
+-- ============================================================
+INSERT INTO backgrounds (title, is_color, color_code, category, is_featured) VALUES
 ('White', TRUE, '#FFFFFF', 'solid', TRUE),
 ('Black', TRUE, '#000000', 'solid', TRUE),
 ('Light Gray', TRUE, '#F5F5F5', 'solid', TRUE),
+('Dark Gray', TRUE, '#374151', 'solid', FALSE),
 ('Navy Blue', TRUE, '#001F3F', 'solid', FALSE),
 ('Coral', TRUE, '#FF6B6B', 'solid', FALSE),
 ('Purple', TRUE, '#7C3AED', 'solid', FALSE),
-('Green', TRUE, '#10B981', 'solid', FALSE);
+('Teal', TRUE, '#0D9488', 'solid', FALSE),
+('Green', TRUE, '#10B981', 'solid', FALSE),
+('Orange', TRUE, '#F97316', 'solid', FALSE);
 
--- Insert sample template
-INSERT IGNORE INTO templates (title, category, description, canvas_data, width, height, is_featured)
-VALUES (
-  'Blank Canvas',
-  'Basics',
-  'Start with a blank canvas',
-  '[]',
-  1920,
-  1080,
-  TRUE
-);
+-- ============================================================
+-- Seed: Starter templates (with proper canvas_data JSON)
+-- ============================================================
+INSERT INTO templates (title, category, description, canvas_data, width, height, is_featured) VALUES
+('Blank Presentation', 'Basics', 'Clean 1920x1080 canvas', '{"elements":[],"background":{"type":"solid","solid":{"color":"#ffffff","opacity":100}}}', 1920, 1080, TRUE),
+('Blank Instagram Post', 'Social Media', 'Square canvas for Instagram', '{"elements":[],"background":{"type":"solid","solid":{"color":"#ffffff","opacity":100}}}', 1080, 1080, TRUE),
+('Blank Instagram Story', 'Social Media', 'Vertical canvas for Stories and Reels', '{"elements":[],"background":{"type":"solid","solid":{"color":"#ffffff","opacity":100}}}', 1080, 1920, FALSE),
+('Blank YouTube Thumbnail', 'Social Media', '1280x720 thumbnail canvas', '{"elements":[],"background":{"type":"solid","solid":{"color":"#1a1d2e","opacity":100}}}', 1280, 720, FALSE),
+('Blank Business Card', 'Print', 'Standard business card size', '{"elements":[],"background":{"type":"solid","solid":{"color":"#ffffff","opacity":100}}}', 420, 240, FALSE);
 `;
 
 async function runMigration() {
   try {
     console.log('🔄 Starting database migration...');
+    console.log('⚠️  This will DROP and recreate canva_db entirely.\n');
 
-    // Connect to MySQL without specifying database
     const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
+      host: process.env.DB_HOST || 'localhost',
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || '',
       multipleStatements: true
     });
 
-    // Execute the schema
     await connection.query(DB_SCHEMA);
 
-    console.log('✓ Database migration completed successfully!');
-    console.log('✓ Database: canva_db');
-    console.log('✓ User: ' + process.env.DB_USER);
-    console.log('✓ Tables created:');
-    console.log('  - users');
-    console.log('  - projects');
-    console.log('  - templates');
-    console.log('  - backgrounds');
-    console.log('  - assets');
-    console.log('  - fonts');
+    console.log('✓ Old database dropped (canva_db)');
+    console.log('✓ New database created: canva_db');
+    console.log('✓ Tables: users, projects, templates, backgrounds, assets, fonts');
+    console.log('✓ Seeded: 10 fonts, 10 backgrounds, 5 starter templates');
+    console.log('\n✅ Migration complete! Run: npm run dev\n');
 
     await connection.end();
   } catch (error) {
     console.error('✗ Migration failed:', error.message);
+    console.error('\nTroubleshooting:');
+    console.error('  1. Is MySQL running?');
+    console.error('  2. Are DB_HOST / DB_USER / DB_PASSWORD correct in .env?');
+    console.error('  3. Does your MySQL user have CREATE/DROP privileges?');
     process.exit(1);
   }
 }
