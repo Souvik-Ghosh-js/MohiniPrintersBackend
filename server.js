@@ -27,7 +27,7 @@ const io = socketIO(server, {
 // DATABASE CONNECTION
 // ========================================
 const sequelize = new Sequelize(
-  process.env.DB_NAME || 'designstudio',
+  process.env.DB_NAME || 'canva_db',
   process.env.DB_USER || 'root',
   process.env.DB_PASSWORD || '',
   {
@@ -72,7 +72,7 @@ const Project = sequelize.define('Project', {
   title: { type: DataTypes.STRING, defaultValue: 'Untitled Design' },
   description: DataTypes.TEXT,
   thumbnail_url: DataTypes.STRING,
-  canvas_data: { type: DataTypes.LONGTEXT },
+  canvas_data: { type: DataTypes.TEXT('long') }, // FIXED: Use TEXT('long') instead of LONGTEXT
   width: { type: DataTypes.INTEGER, defaultValue: 1920 },
   height: { type: DataTypes.INTEGER, defaultValue: 1080 },
   is_public: { type: DataTypes.BOOLEAN, defaultValue: false }
@@ -84,7 +84,7 @@ const Template = sequelize.define('Template', {
   category: DataTypes.STRING,
   description: DataTypes.TEXT,
   thumbnail_url: DataTypes.STRING,
-  canvas_data: DataTypes.LONGTEXT,
+  canvas_data: DataTypes.TEXT('long'), // FIXED
   width: { type: DataTypes.INTEGER, defaultValue: 1920 },
   height: { type: DataTypes.INTEGER, defaultValue: 1080 },
   is_featured: { type: DataTypes.BOOLEAN, defaultValue: false },

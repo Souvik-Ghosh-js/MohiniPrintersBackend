@@ -1,4 +1,4 @@
-// migrate.js - Database Migration Script (raw SQL, no Sequelize)
+// migrate.js - Database Migration Script
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
@@ -162,7 +162,7 @@ async function runMigration() {
     console.log('✓ New database created: canva_db');
     console.log('✓ Tables: users, projects, templates, backgrounds, assets, fonts');
     console.log('✓ Seeded: 10 fonts, 10 backgrounds, 5 starter templates');
-    console.log('\n✅ Migration complete! Run: npm run dev\n');
+    console.log('\n✅ Migration complete! Run: npm start\n');
 
     await connection.end();
   } catch (error) {
