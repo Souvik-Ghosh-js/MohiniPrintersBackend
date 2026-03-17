@@ -710,7 +710,7 @@ app.use((err, req, res, next) => {
 // ========================================
 // START
 // ========================================
-const PORT =  5000;
+const PORT =  3000;
 
 sequelize.sync({ alter: process.env.NODE_ENV === 'development' }).then(() => {
   console.log('✓ Database synced');
