@@ -119,7 +119,6 @@ app.use(cors({
     'http://13.126.144.58',
     'https://mohiniprinters.netlify.app',
     'https://mohini.gobt.in',
-    'https://mohini.gobt.in/',
     'https://mohiniprintshop.org/',
     'https://www.mohiniprintshop.org/'
   ],
