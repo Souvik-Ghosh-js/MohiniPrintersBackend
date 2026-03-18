@@ -114,7 +114,14 @@ const sequelize = new Sequelize(
 );
 app.use(cors({
   origin: [
-    '*'
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://13.126.144.58',
+    'https://mohiniprinters.netlify.app',
+    'https://mohini.gobt.in',
+    'https://mohini.gobt.in/',
+    'https://mohiniprintshop.org/',
+    'https://www.mohiniprintshop.org/'
   ],
   credentials: true
 }));
