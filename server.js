@@ -721,7 +721,8 @@ app.use(cors({
 // ========================================
 const PORT =  3000;
 
-sequelize.sync({ alter: process.env.NODE_ENV === 'development' }).then(() => {
+sequelize.sync({ alter: false })
+.then(() => {
   console.log('✓ Database synced');
   console.log('✓ Upload folders:', ASSET_BUCKETS.map(b => `uploads/${b}`).join(', '));
   server.listen(PORT, () => {
