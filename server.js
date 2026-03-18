@@ -118,17 +118,19 @@ app.use(cors({
     'http://localhost:3001',
     'http://13.126.144.58',
     'https://mohiniprinters.netlify.app',
-    'https://mohini.gobt.in',
-    'https://mohiniprintshop.org',
-    'https://www.mohiniprintshop.org'
+    'https://mohini.gobt.in/',
+    'https://mohiniprintshop.org/',
+    'https://www.mohiniprintshop.org/'
   ],
   credentials: true
 }));
 // ========================================
 // MIDDLEWARE
 // ========================================
-app.use(helmet({ contentSecurityPolicy: false }));
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: false  // ← ADD THIS
+}));app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -136,6 +138,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Serve uploaded files publicly
 app.use('/uploads', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');  // ← ADD THIS
   next();
 }, express.static(UPLOAD_BASE));
 
