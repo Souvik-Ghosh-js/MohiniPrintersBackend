@@ -38,6 +38,18 @@ ASSET_BUCKETS.forEach(bucket => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
+// Thumbnails directory
+const THUMB_DIR = path.join(UPLOAD_BASE, 'thumbnails');
+if (!fs.existsSync(THUMB_DIR)) fs.mkdirSync(THUMB_DIR, { recursive: true });
+
+const thumbUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, THUMB_DIR),
+    filename: (req, file, cb) => cb(null, `proj_${req.params.id}_${Date.now()}.jpg`),
+  }),
+  limits: { fileSize: 3 * 1024 * 1024 },
+});
+
 // Multer storage - saves to /uploads/:bucket/
 const multerStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -353,6 +365,21 @@ app.put('/api/projects/:id', authMiddleware, async (req, res) => {
       ...(height !== undefined && { height }),
     });
     res.json({ success: true, data: { id: project.id, title: project.title, updatedAt: project.updatedAt } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/projects/:id/thumbnail', authMiddleware, thumbUpload.single('thumbnail'), async (req, res) => {
+  try {
+    const project = await Project.findByPk(req.params.id);
+    if (!project || project.user_id !== req.user.id) return res.status(404).json({ success: false, message: 'Not found' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file' });
+    const proto = req.protocol;
+    const host = req.get('host');
+    const thumbnailUrl = `${proto}://${host}/uploads/thumbnails/${req.file.filename}`;
+    await project.update({ thumbnail_url: thumbnailUrl });
+    res.json({ success: true, thumbnail_url: thumbnailUrl });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
