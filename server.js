@@ -752,7 +752,7 @@ app.use(cors({
 // ========================================
 // START
 // ========================================
-const PORT =  5000;
+const PORT =  3000;
 
 sequelize.sync({ alter: false })
 .then(() => {
