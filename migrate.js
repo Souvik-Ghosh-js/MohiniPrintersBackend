@@ -1,5 +1,6 @@
 // migrate.js - Database Migration Script
 const mysql = require('mysql2/promise');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const DB_SCHEMA = `
@@ -162,6 +163,21 @@ async function runMigration() {
     console.log('✓ New database created: canva_db');
     console.log('✓ Tables: users, projects, templates, backgrounds, assets, fonts');
     console.log('✓ Seeded: 10 fonts, 10 backgrounds, 5 starter templates');
+
+    // Seed admin user
+    const adminEmail    = 'mohini.palash@gmail.com';
+    const adminPassword = 'Designadmin@123';
+    const adminName     = 'Mohini Admin';
+    const adminHash     = await bcrypt.hash(adminPassword, 12);
+
+    await connection.execute(
+      `INSERT INTO canva_db.users (email, password_hash, name, is_admin)
+       VALUES (?, ?, ?, TRUE)
+       ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash), is_admin = TRUE`,
+      [adminEmail, adminHash, adminName]
+    );
+
+    console.log('✓ Admin user seeded:', adminEmail);
     console.log('\n✅ Migration complete! Run: npm start\n');
 
     await connection.end();
