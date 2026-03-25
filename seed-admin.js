@@ -21,9 +21,9 @@ async function seedAdmin() {
     const hash     = await bcrypt.hash(password, 12);
 
     await connection.execute(
-      `INSERT INTO users (email, password_hash, name, is_admin)
-       VALUES (?, ?, ?, TRUE)
-       ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash), is_admin = TRUE`,
+      `INSERT INTO users (email, password_hash, name, is_admin, createdAt, updatedAt)
+       VALUES (?, ?, ?, TRUE, NOW(), NOW())
+       ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash), is_admin = TRUE, updatedAt = NOW()`,
       [email, hash, name]
     );
 
